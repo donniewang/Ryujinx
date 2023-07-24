@@ -1,4 +1,5 @@
-﻿using Ryujinx.SDL2.Common;
+﻿using Ryujinx.Common.Logging;
+using Ryujinx.SDL2.Common;
 using System;
 using System.Collections.Generic;
 using static SDL2.SDL;
@@ -28,6 +29,8 @@ namespace Ryujinx.Input.SDL2
 
             // Add already connected gamepads
             int numJoysticks = SDL_NumJoysticks();
+
+            Logger.Error?.Print(LogClass.Application, $"SDL_NumJoysticks : {numJoysticks}");
 
             for (int joystickIndex = 0; joystickIndex < numJoysticks; joystickIndex++)
             {
@@ -72,9 +75,17 @@ namespace Ryujinx.Input.SDL2
 
         private void HandleJoyStickConnected(int joystickDeviceId, int joystickInstanceId)
         {
+
+            Logger.Error?.Print(LogClass.Application, $"HandleJoyStickConnected : {joystickDeviceId} {joystickInstanceId}");
+
             if (SDL_IsGameController(joystickDeviceId) == SDL_bool.SDL_TRUE)
             {
+
+                Logger.Error?.Print(LogClass.Application, $"SDL_IsGameController : {SDL_IsGameController(joystickDeviceId)}");
+
                 string id = GenerateGamepadId(joystickDeviceId);
+
+                Logger.Error?.Print(LogClass.Application, $"GenerateGamepadId : {id}");
 
                 if (id == null)
                 {
@@ -85,9 +96,13 @@ namespace Ryujinx.Input.SDL2
                 // so it is rejected to avoid doubling the entries.
                 if (_gamepadsIds.Contains(id))
                 {
+                    Logger.Error?.Print(LogClass.Application, $"gamepadsIds.Contains : {_gamepadsIds} {id}");
+
                     return;
                 }
 
+                Logger.Error?.Print(LogClass.Application, $"gamepadsInstanceIdsMapping TryAdd : {joystickInstanceId} {id}");
+                
                 if (_gamepadsInstanceIdsMapping.TryAdd(joystickInstanceId, id))
                 {
                     _gamepadsIds.Add(id);
@@ -124,6 +139,9 @@ namespace Ryujinx.Input.SDL2
 
         public IGamepad GetGamepad(string id)
         {
+
+            Logger.Error?.Print(LogClass.Application, $"GetGamepad {id}");
+
             int joystickIndex = GetJoystickIndexByGamepadId(id);
 
             if (joystickIndex == -1)
@@ -136,7 +154,13 @@ namespace Ryujinx.Input.SDL2
                 return null;
             }
 
-            IntPtr gamepadHandle = SDL_GameControllerOpen(joystickIndex);
+
+            IntPtr gamepadHandle = SDL_JoystickOpen(joystickIndex);
+
+            if (gamepadHandle == IntPtr.Zero)
+            {
+                gamepadHandle = SDL_GameControllerOpen(joystickIndex);
+            }
 
             if (gamepadHandle == IntPtr.Zero)
             {

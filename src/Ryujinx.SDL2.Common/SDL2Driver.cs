@@ -3,6 +3,7 @@ using Ryujinx.Common.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using static SDL2.SDL;
@@ -98,9 +99,20 @@ namespace Ryujinx.SDL2.Common
 
                 string gamepadDbPath = Path.Combine(ReleaseInformation.GetBaseApplicationDirectory(), "SDL_GameControllerDB.txt");
 
+                Logger.Error?.Print(LogClass.Hid, $"SDL_GameControllerDB.txt {gamepadDbPath} File exists : {File.Exists(gamepadDbPath)}");
+
                 if (File.Exists(gamepadDbPath))
                 {
-                    SDL_GameControllerAddMappingsFromFile(gamepadDbPath);
+                    var r = SDL_GameControllerAddMappingsFromFile(gamepadDbPath);
+
+                    if (r < 0)
+                    {
+                        Logger.Error?.Print(LogClass.Application, $"Failed to load GameControllerDB, {gamepadDbPath}");
+                    }
+                    else 
+                    {
+                        Logger.Error?.Print(LogClass.Application, $"GameControllerDB loaded successfully. {gamepadDbPath}");
+                    }
                 }
 
                 _registeredWindowHandlers = new ConcurrentDictionary<uint, Action<SDL_Event>>();
@@ -124,23 +136,28 @@ namespace Ryujinx.SDL2.Common
         {
             if (evnt.type == SDL_EventType.SDL_JOYDEVICEADDED)
             {
-                int deviceId = evnt.cbutton.which;
+                // int deviceId = evnt.cbutton.which;
+                int deviceId = evnt.jdevice.which;
+
+                Logger.Error?.Print(LogClass.Application, $"SDL_Event deviceId {evnt.type} {evnt.cbutton.which} {evnt.jdevice.which}");
 
                 // SDL2 loves to be inconsistent here by providing the device id instead of the instance id (like on removed event), as such we just grab it and send it inside our system.
                 int instanceId = SDL_JoystickGetDeviceInstanceID(deviceId);
+
+                Logger.Error?.Print(LogClass.Application, $"SDL_Event instanceId {instanceId}");
 
                 if (instanceId == -1)
                 {
                     return;
                 }
 
-                Logger.Debug?.Print(LogClass.Application, $"Added joystick instance id {instanceId}");
+                Logger.Error?.Print(LogClass.Application, $"Added joystick instance id {instanceId}");
 
                 OnJoyStickConnected?.Invoke(deviceId, instanceId);
             }
             else if (evnt.type == SDL_EventType.SDL_JOYDEVICEREMOVED)
             {
-                Logger.Debug?.Print(LogClass.Application, $"Removed joystick instance id {evnt.cbutton.which}");
+                Logger.Error?.Print(LogClass.Application, $"Removed joystick instance id {evnt.cbutton.which}");
 
                 OnJoystickDisconnected?.Invoke(evnt.cbutton.which);
             }

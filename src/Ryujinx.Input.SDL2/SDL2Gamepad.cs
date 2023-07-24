@@ -77,7 +77,9 @@ namespace Ryujinx.Input.SDL2
             _gamepadHandle = gamepadHandle;
             _buttonsUserMapping = new List<ButtonMappingEntry>(20);
 
-            Name = SDL_GameControllerName(_gamepadHandle);
+            //Name = SDL_GameControllerName(_gamepadHandle);
+            Name = SDL_JoystickName(_gamepadHandle);
+
             Id = driverId;
             Features = GetFeaturesFlag();
             _triggerThreshold = 0.0f;

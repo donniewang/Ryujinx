@@ -17,6 +17,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
+using static SDL2.SDL;
 using ConfigGamepadInputId = Ryujinx.Common.Configuration.Hid.Controller.GamepadInputId;
 using ConfigStickInputId = Ryujinx.Common.Configuration.Hid.Controller.StickInputId;
 using GUI = Gtk.Builder.ObjectAttribute;
@@ -215,6 +216,9 @@ namespace Ryujinx.Ui.Windows
 
         private void HandleOnGamepadConnected(string id)
         {
+
+            Logger.Error?.Print(LogClass.Application, $"HandleOnGamepadConnected {id}");
+
             Application.Invoke(delegate
             {
                 UpdateInputDeviceList();
@@ -248,12 +252,18 @@ namespace Ryujinx.Ui.Windows
 
         private void UpdateInputDeviceList()
         {
+
+            Logger.Error?.Print(LogClass.Application, $"UpdateInputDeviceList");
+
             _inputDevice.RemoveAll();
             _inputDevice.Append("disabled", "Disabled");
             _inputDevice.SetActiveId("disabled");
 
             foreach (string id in _mainWindow.InputManager.KeyboardDriver.GamepadsIds)
             {
+
+                Logger.Error?.Print(LogClass.Application, $"UpdateInputDeviceList KeyboardDriver {id}");
+
                 IGamepad gamepad = _mainWindow.InputManager.KeyboardDriver.GetGamepad(id);
 
                 if (gamepad != null)
@@ -266,6 +276,8 @@ namespace Ryujinx.Ui.Windows
 
             foreach (string id in _mainWindow.InputManager.GamepadDriver.GamepadsIds)
             {
+                Logger.Error?.Print(LogClass.Application, $"UpdateInputDeviceList GamepadDriver {id}");
+
                 IGamepad gamepad = _mainWindow.InputManager.GamepadDriver.GetGamepad(id);
 
                 if (gamepad != null)
