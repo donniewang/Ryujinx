@@ -136,15 +136,40 @@ namespace Ryujinx.SDL2.Common
         {
             if (evnt.type == SDL_EventType.SDL_JOYDEVICEADDED)
             {
+                Logger.Error?.Print(LogClass.Application, $"SDL_Event deviceId {evnt.type} {evnt.cbutton.which} {evnt.jdevice.which} {evnt.cdevice.which}");
+
                 // int deviceId = evnt.cbutton.which;
                 int deviceId = evnt.jdevice.which;
-
-                Logger.Error?.Print(LogClass.Application, $"SDL_Event deviceId {evnt.type} {evnt.cbutton.which} {evnt.jdevice.which}");
 
                 // SDL2 loves to be inconsistent here by providing the device id instead of the instance id (like on removed event), as such we just grab it and send it inside our system.
                 int instanceId = SDL_JoystickGetDeviceInstanceID(deviceId);
 
                 Logger.Error?.Print(LogClass.Application, $"SDL_Event instanceId {instanceId}");
+
+
+
+                if (instanceId == -1)
+                {
+                    deviceId = evnt.cbutton.which;
+
+                    // SDL2 loves to be inconsistent here by providing the device id instead of the instance id (like on removed event), as such we just grab it and send it inside our system.
+                    instanceId = SDL_JoystickGetDeviceInstanceID(deviceId);
+
+                    Logger.Error?.Print(LogClass.Application, $"SDL_Event instanceId {instanceId}");
+
+                }
+
+
+                if (instanceId == -1)
+                {
+                    deviceId = evnt.cdevice.which;
+
+                    // SDL2 loves to be inconsistent here by providing the device id instead of the instance id (like on removed event), as such we just grab it and send it inside our system.
+                    instanceId = SDL_JoystickGetDeviceInstanceID(deviceId);
+
+                    Logger.Error?.Print(LogClass.Application, $"SDL_Event instanceId {instanceId}");
+
+                }
 
                 if (instanceId == -1)
                 {

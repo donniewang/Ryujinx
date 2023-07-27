@@ -105,6 +105,9 @@ namespace Ryujinx.Input.SDL2
                 
                 if (_gamepadsInstanceIdsMapping.TryAdd(joystickInstanceId, id))
                 {
+
+                    Logger.Error?.Print(LogClass.Application, $"gamepadsInstanceIdsMapping TryAdd : ok {id}");
+
                     _gamepadsIds.Add(id);
 
                     OnGamepadConnected?.Invoke(id);

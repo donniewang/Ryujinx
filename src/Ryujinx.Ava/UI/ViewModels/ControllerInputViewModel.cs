@@ -20,6 +20,7 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Utilities;
 using Ryujinx.Input;
 using Ryujinx.Ui.Common.Configuration;
+using Silk.NET.Vulkan;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -450,6 +451,9 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public void LoadDevices()
         {
+
+            Logger.Error?.Print(LogClass.Application, $"LoadDevices");
+
             lock (Devices)
             {
                 Devices.Clear();
@@ -466,12 +470,22 @@ namespace Ryujinx.Ava.UI.ViewModels
                     }
                 }
 
+                Logger.Error?.Print(LogClass.Application, $"mainWindow.InputManager.GamepadDriver.GamepadsIds {_mainWindow.InputManager.GamepadDriver.GamepadsIds.Length}");
+
                 foreach (string id in _mainWindow.InputManager.GamepadDriver.GamepadsIds)
                 {
+
+                    Logger.Error?.Print(LogClass.Application, $"mainWindow.InputManager.GamepadDriver.GetGamepad {id}");
+
                     using IGamepad gamepad = _mainWindow.InputManager.GamepadDriver.GetGamepad(id);
+
+                    Logger.Error?.Print(LogClass.Application, $"mainWindow.InputManager.GamepadDriver.GetGamepad {gamepad!=null}");
 
                     if (gamepad != null)
                     {
+
+                        Logger.Error?.Print(LogClass.Application, $"mainWindow.InputManager.GamepadDriver.GetGamepad {gamepad.Id}");
+
                         if (Devices.Any(controller => GetShortGamepadId(controller.Id) == GetShortGamepadId(gamepad.Id)))
                         {
                             _controllerNumber++;
